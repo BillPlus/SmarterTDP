@@ -1,27 +1,6 @@
 /*
-
-	SmarterTDP Script by Bill-P
-	
-	This script takes the current CPU and GPU usage statistics of
-  an AMD APU and determines an appropriate TDP limit amount to set 
-	to the APU to maximize battery life and performance.
-  
-  Lightning icon created by Aldo Cervantes on FlatIcon:
-  https://www.flaticon.com/free-icons/lightning
-  
-	This program is free software: you can redistribute it and/or 
-	modify it under the terms of the GNU General Public License as
-	published by the Free Software Foundation, either version 3 of
-	the License, or (at your option) any later version.
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see
-	<http://www.gnu.org/licenses/>.
-  
-*/
+ | Copyright (C) 2023 BillPlus
+ */
 
 #NoEnv
 #SingleInstance Force
@@ -33,13 +12,13 @@ Process, Priority,, H
 SetBatchLines, -1
 SetWinDelay, -1
 SetControlDelay, -1
-SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+SetWorkingDir %A_ScriptDir%
 DetectHiddenWindows, On
 CoordMode, ToolTip, Screen
 
 global DEFAULT_TDP := 10000
-global MAX_CPU_TDP := 15000 ; watts
-global MAX_GPU_TDP := 15000 ; watts
+global MAX_CPU_TDP := 15000
+global MAX_GPU_TDP := 15000
 
 global RYZENADJ_DELAY := 4000 ; min delay between each adjustment (too fast can cause microstutter)
 global TIMER_RESOLUTION := 2000
@@ -96,20 +75,20 @@ About:
   return
 
 FavorPerformance:
-  MAX_CPU_TDP := 36000 ; watts
-  MAX_GPU_TDP := 28000 ; watts
+  MAX_CPU_TDP := 36000
+  MAX_GPU_TDP := 28000
   SaveSettings()
   return
   
 FavorBalance:
-  MAX_CPU_TDP := 22000 ; watts
-  MAX_GPU_TDP := 22000 ; watts
+  MAX_CPU_TDP := 22000
+  MAX_GPU_TDP := 22000
   SaveSettings()
   return
 
 FavorEfficiency:
-  MAX_CPU_TDP := 15000 ; watts
-  MAX_GPU_TDP := 15000 ; watts
+  MAX_CPU_TDP := 15000
+  MAX_GPU_TDP := 15000
   SaveSettings()
   return
   
@@ -181,10 +160,6 @@ CPULoad() ; CPULoad() by SKAN
 
 OnPowerBroadcast(wParam, lParam)
 {
-  ; PBT_APMSUSPEND or PBT_APMSTANDBY? -> System will sleep
-  if (wParam = 4 OR wParam = 5) {
-    ; not fast enough
-  }
   ; PBT_APMRESUMESUSPEND or PBT_APMRESUMESTANDBY -> device wakes up
   if (wParam = 7 OR wParam = 8) {
     StopMonitoring()

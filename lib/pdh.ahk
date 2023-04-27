@@ -1,4 +1,8 @@
-﻿global PDH_MODULE := LoadPDH()
+﻿/*
+ | Copyright (C) 2023 BillPlus
+ */
+
+global PDH_MODULE := LoadPDH()
 
 global PDH_ERROR_SUCCESS  := 0
 global PDH_FMT_LONG   := 0x00000100
@@ -87,9 +91,7 @@ PDHFormatCounterValueFromDoubleArray(hCounter)
     sum := 0.0
     addr := 0
     Loop, %itemCount% {
-      ;szName := NumGet(&itemBuffer + 0, addr , "Ptr")
       fmtValue := NumGet(&itemBuffer + 0, addr + A_PtrSize + 8, "Double")
-      ;instName := NumGet(szName, 0, "Str")
       sum += fmtValue
       addr += A_PtrSize + 16
     }

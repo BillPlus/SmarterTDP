@@ -1,4 +1,8 @@
-﻿global RYA_MODULE := LoadRyzenAdj()
+﻿/*
+ | Copyright (C) 2023 BillPlus
+ */
+
+global RYA_MODULE := LoadRyzenAdj()
 
 global FN_RYA_INIT_ACCESS := DllCall("GetProcAddress", "Ptr", RYA_MODULE, "AStr", "init_ryzenadj", "Ptr")
 global FN_RYA_CLEAN_UP := DllCall("GetProcAddress", "Ptr", RYA_MODULE, "AStr", "cleanup_ryzenadj", "Ptr")

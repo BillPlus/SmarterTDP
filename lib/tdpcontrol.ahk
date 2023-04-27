@@ -1,18 +1,24 @@
-﻿global POWERCFG_PPSUB_PROCESSOR := "54533251-82be-4824-96c1-47b60b740d00"
+﻿/*
+ | Copyright (C) 2023 BillPlus
+ */
+
+global POWERCFG_PPSUB_PROCESSOR := "54533251-82be-4824-96c1-47b60b740d00"
 global POWERCFG_MAX_PROC_STATE  := "bc5038f7-23e0-4960-96da-33abaf5935ec"
 global POWERCFG_PERF_BOOST_MODE := "be337238-0d82-4146-a960-4f3749d470c7"
 global POWERCFG_PERF_ENERG_PREF := "36687f9e-e3a5-4dbf-b1dc-15eb381c6863"
 global POWERCFG_PERF_ENERG_PRF1 := "36687f9e-e3a5-4dbf-b1dc-15eb381c6864"
 global POWERCFG_PERF_AUTONOMOUS := "8baa4a8a-14c6-4451-8e8b-14bdbd197537"
 
+; ToDo: make this specific to 6800U and make a threshold curve instead
 ; Note: don't go below 3W as it is detrimental and can crash the device
 global MIN_TDP := 3500
 global MIN_DEC_TDP := 5000
 global LOW_CPU_TDP_THRESHOLD := 5000
 global LOW_GPU_TDP_THRESHOLD := 8000
 
+; threshold amounts
 global CPU_INC_THRESHOLD := 65
-global CPU_DEC_THRESHOLD := 12
+global CPU_DEC_THRESHOLD := 15
 global GPU_INC_THRESHOLD := 75
 global GPU_DEC_THRESHOLD := 45
 global COMBO_THRESHOLD := 65 ; weird condition where CPU and GPU are bottlenecked at low power
@@ -21,12 +27,10 @@ global CPU_INC_THRESHOLD_LOW := 12
 global CPU_DEC_THRESHOLD_LOW := 5
 global GPU_INC_THRESHOLD_LOW := 72
 global GPU_DEC_THRESHOLD_LOW := 16
-global CPU_OVERHEAD := 5
-global GPU_OVERHEAD := 12
 
 global HIGH_MULTIPLIER := 0.75 ; adjust how fast TDP scales up
 global LOW_MULTIPLIER := 0.45 ; adjust how fast TDP scales down
-global DIFF_RATIO := 1.1
+global DIFF_RATIO := 1.1 ; don't adjust if new value is not within this ratio
 global THROTTLE_RATIO := 1.5 ; don't drop performance abruptly by this amount
 
 global GPU_INC_RATIO := 0.3
@@ -96,9 +100,6 @@ DetermineTDP(pName, cpuLoad, gpuLoad, decLoad, currentTDP, maxCPUTDP, maxGPUTDP)
   lastTDP := currentTDP
   newTDP := 0
   boostTDP := 0
-  
-  cpuLoad += currentTDP > LOW_CPU_TDP_THRESHOLD ? CPU_OVERHEAD : 0
-  gpuLoad += currentTDP > LOW_GPU_TDP_THRESHOLD ? GPU_OVERHEAD : 0
   
   if (lastGPU != -1) {
     if (gpuLoad > lastGPU && ((gpuLoad - lastGPU) / 100) > GPU_INC_RATIO) {
