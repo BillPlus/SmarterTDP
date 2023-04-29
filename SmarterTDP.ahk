@@ -28,13 +28,16 @@ if (!A_IsAdmin) {
   Run *RunAs "%A_ScriptFullPath%"
 }
 
-aboutText := "SmarterTDP v0.0.7"
+aboutText := "SmarterTDP v0.0.8"
 
 ; Replace default AHK menu
 Menu, Tray, Tip , Current TDP: 10W
 Menu, Tray, NoStandard
-Menu, Tray, Add, %aboutText%, About
+Menu, Tray, Add, %aboutText%, NoOp
 Menu, Tray, Disable, %aboutText%
+Menu, Tray, Add ; separator
+Menu, Tray, Add, EPP Hack (beta), ToggleEppHack
+Menu, Tray, Add ; separator
 Menu, Tray, Add, Performance (36W), FavorPerformance
 Menu, Tray, Add, Balance (22W), FavorBalance
 Menu, Tray, Add, Efficiency (15W), FavorEfficiency
@@ -54,6 +57,7 @@ global CURRENT := DEFAULT_TDP
 global CHOSEN := ""
 global CUSTOM_CPU_TDP := 0
 global CUSTOM_GPU_TDP := 0
+global EPP_HACK := false
 SetTDP(DEFAULT_TDP)
 OnExit("CleanUp")
 
@@ -62,7 +66,9 @@ OnMessage(0x218, "OnPowerBroadcast")
 
 LoadSettings()
 SaveSettings()
-SetPowerSettings()
+if (EPP_HACK) {
+  SetPowerSettings()
+}
 
 global FN_MONITOR := Func("MonitorAndAdjust")
 StartMonitoring()
@@ -71,7 +77,18 @@ return
 /*
  | MENU OPTIONS
  */
-About:
+NoOp:
+  return
+  
+ToggleEppHack:
+  EPP_HACK := !EPP_HACK
+  SaveSettings()
+  if (EPP_HACK) {
+    SetPowerSettings()
+  }
+  else {
+    RestorePowerSettings()
+  }
   return
 
 FavorPerformance:
@@ -164,7 +181,9 @@ OnPowerBroadcast(wParam, lParam)
   if (wParam = 7 OR wParam = 8) {
     StopMonitoring()
     SetTDP(CURRENT)
-    SetPowerSettings()
+    if (EPP_HACK) {
+      SetPowerSettings()
+    }
     
     time := RYZENADJ_DELAY - TIMER_RESOLUTION
     Sleep %time%
@@ -173,7 +192,9 @@ OnPowerBroadcast(wParam, lParam)
   ; PBT_APMPOWERSTATUSCHANGE -> battery vs charger
   else if (wParam = 10) {
     StopMonitoring()
-    SetPowerSettings()
+    if (EPP_HACK) {
+      SetPowerSettings()
+    }
     StartMonitoring()
   }
 
@@ -213,6 +234,8 @@ LoadSettings()
   }
   MAX_CPU_TDP := maxCPUTDP
   MAX_GPU_TDP := maxGPUTDP
+  IniRead, eppHack, config.ini, Power, eppHack, 0
+  EPP_HACK := eppHack = 1
   UpdateMenu()
 }
 
@@ -220,6 +243,8 @@ SaveSettings()
 {
   IniWrite, %MAX_CPU_TDP%, config.ini, Power, cpuTDP
   IniWrite, %MAX_GPU_TDP%, config.ini, Power, gpuTDP
+  eppHack := EPP_HACK ? 1 : 0
+  IniWrite, %eppHack%, config.ini, Power, eppHack
   UpdateMenu()
 }
 
@@ -251,6 +276,13 @@ UpdateMenu()
     Menu, Tray, Check, Custom (%maxCustom%W)
     CHOSEN := "Custom (" . maxCustom . "W)"
   }
+  
+  if (EPP_HACK) {
+    Menu, Tray, Check, EPP Hack (beta)
+  }
+  else {
+    Menu, Tray, Uncheck, EPP Hack (beta)
+  }
 }
 
 CleanUp()
@@ -260,5 +292,6 @@ CleanUp()
   Sleep %RYZENADJ_DELAY%
   SetTDP(DEFAULT_TDP)
   RestorePowerSettings()
+  RestoreBoostSettings()
   PDHCloseQuery(PDH_QUERY)
 }
